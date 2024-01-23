@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne, OneToMany, ManyToMany } from 'typeorm';
 import { User } from '../users/users.entity';
 import { FieldStudy } from '../FieldStudy/field.entity';
 
@@ -22,7 +22,7 @@ export class Teachers {
   @Column()
   fieldStudyId: number; 
 
-  @OneToOne(() => FieldStudy)
+  @ManyToOne(() => FieldStudy)
   @JoinColumn({ name: 'fieldStudyId' })
   field_study: FieldStudy;
 

@@ -27,7 +27,7 @@ export class AuthService {
                 return undefined;
             }
 
-            return await this.refreshTokenRepository.findOne(decoded.id);
+            return await this.refreshTokenRepository.findOne({ where: { id: decoded.id } });
         } catch (error) {
             return undefined;
         }
@@ -38,11 +38,11 @@ export class AuthService {
         const { role, phoneNumber, nationalCode } = userData;
 
         if (!!(await this.userService.findByNationalCode(nationalCode))) {
-            return new NotAcceptableException("شماره شناسنامه قبلا ثبت شده")
+            throw new NotAcceptableException("شماره شناسنامه قبلا ثبت شده")
         }
 
         if (!!(await this.userService.findByPhoneNumber(phoneNumber))) {
-            return new NotAcceptableException("شماره همراه قبلا ثبت شده")
+            throw new NotAcceptableException("شماره همراه قبلا ثبت شده")
         }
 
         if (!Object.values(UserRole).includes(role)) {
@@ -57,7 +57,7 @@ export class AuthService {
         return { msg: "user create successfuly", accessToken: jwt.accessToken, refreshToken: jwt.refreshToken };
     }
 
-    async refresh(refreshStr: string): Promise<string | undefined> {
+    async refresh(refreshStr: string): Promise<{ accessToken: string } | undefined> {
         const refreshToken = await this.retrieveRefreshToken(refreshStr);
 
         if (!refreshToken) {
@@ -74,7 +74,7 @@ export class AuthService {
             userId: refreshToken.userId,
         };
 
-        return sign(accessToken, process.env.ACCESS_SECRET, { expiresIn: '1h' });
+        return { accessToken: sign(accessToken, process.env.ACCESS_SECRET, { expiresIn: '1h' }) }
     }
 
     async login(
@@ -115,12 +115,14 @@ export class AuthService {
         };
     }
 
-    async logout(refreshStr: string): Promise<void> {
+    async logout(refreshStr: string): Promise<{ message: string }> {
         const refreshToken = await this.retrieveRefreshToken(refreshStr);
 
-        if (!refreshToken) return;
+        if (!refreshToken) return new NotFoundException({ message: "رفرش توکن نامعتبر است"});
 
         // delete refresh token from db
         await this.refreshTokenRepository.delete(refreshToken.id);
+
+        return { message: "ok"}
     }
 }

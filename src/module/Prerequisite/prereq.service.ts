@@ -21,7 +21,7 @@ export class PrereqService {
             .leftJoinAndSelect('prereq.course', 'course')
             .leftJoinAndSelect('prereq.preCourse', 'preCourse')
             .select([
-                'prereq.PREID as PREID',
+                'prereq.PREID as id',
                 'prereq.COID as COID',
                 'prereq.PRECOID as PRECOID',
                 'course.COTITLE as course_COTITLE',
@@ -38,7 +38,7 @@ export class PrereqService {
             .leftJoinAndSelect('prereq.preCourse', 'preCourse')
             .where('prereq.PREID = :id', { id })
             .select([
-                'prereq.PREID as PREID',
+                'prereq.PREID as id',
                 'prereq.COID as COID',
                 'prereq.PRECOID as PRECOID',
                 'course.COTITLE as course_COTITLE',

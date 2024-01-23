@@ -22,10 +22,20 @@ export class CollegeService {
   /*
     SELECT * FROM College
   */
-  async findAll(): Promise<College[]> {
-    return await this.CollegeRepository.find();
-  }
+    async findAll(page: number = 1, itemsPerPage: number = 12, searchTerm: string = ""): Promise<College[]> {
 
+      const skip = (page - 1) * itemsPerPage;
+      return await this.CollegeRepository
+          .createQueryBuilder("c")
+          .select([
+              "CollegeID as id",
+              "CollegeName",
+          ])
+          .where(`CollegeName LIKE N'%${searchTerm}%'`)
+          .skip(skip)
+          .take(itemsPerPage)
+          .getRawMany();
+  }
   /*
     SELECT * FROM College WHERE CollegeID = @CollegeID;
   */

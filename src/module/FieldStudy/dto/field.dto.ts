@@ -10,5 +10,5 @@ export class FSDto {
   @ApiProperty({ example: 1, description: 'College ID' })
   @IsNumber()
   @IsNotEmpty()
-  STEID: number;
+  fk_CollegeID: number;
 }

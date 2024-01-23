@@ -10,9 +10,9 @@ export class FieldStudy {
   FSName: string;
 
   @Column()
-  STEID: number;
+  fk_CollegeID: number;
 
   @ManyToOne(() => College)
-  @JoinColumn({ name: 'STEID' })
-  university: College;
+  @JoinColumn({ name: 'fk_CollegeID' })
+  College: College;
 }

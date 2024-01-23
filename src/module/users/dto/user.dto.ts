@@ -47,3 +47,39 @@ export class CreateUserDto {
     @IsNotEmpty()
     password: string;
 }
+
+export class CreateUserDtoWithoutPassword {
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    firstName: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    lastName: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    nationalCode: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsPhoneNumber('IR', { message: 'Invalid Iranian phone number' })
+    phoneNumber: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    birthDate: Date;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    gender: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    role: UserRole;
+}

@@ -26,43 +26,64 @@ export class CotService {
         return await this.COTRepository.save(course);
     }
 
-    async findAllCourseWithDetails(): Promise<any[]> {
-        const courseDetails = await this.COTRepository
+    async findAllCourseWithDetails(page: number = 1, itemsPerPage: number = 12, searchTerm: string = "", COTYPE: string, FieldID: string): Promise<any[]> {
+        const offset = (page - 1) * itemsPerPage;
+        
+        return await this.COTRepository
             .createQueryBuilder('c')
             .select([
-                'COID',
+                'COID as id',
                 'COTITLE',
                 'COTYPE',
                 'CREDIT',
                 'CFSID',
-                'UniversityName',
+                'CollegeName',
                 'FSName',
-                'TENAME'
+                'CTEID',
+                'TETITLE'
             ])
             .innerJoin(FieldStudy, 'f', 'c.CFSID = f.FSID')
             .innerJoin(Teachers, 't', 'c.CTEID = t.TEID')
-            .innerJoin(College, 'u', 'f.STEID = u.UniversityID')
-            .getRawMany();
+            .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
+            .where(`COTITLE LIKE N'%${searchTerm}%'`)
+            .where((!!COTYPE ? `COTYPE = '${COTYPE}'` : '1=1') + (` ${!!FieldID ? `AND CFSID = ${FieldID}` : ``}`))
+            .offset(offset)
+            .limit(itemsPerPage)
+            .getRawMany()
+            .then(results => {
+                return results.map(result => {
+                    if (result.COTYPE.toLowerCase() === 'a') {
+                        result.COTYPE = 'تخصصی';
+                    } else if (result.COTYPE.toLowerCase() === 'b') {
+                        result.COTYPE = 'اصلی';
+                    } else if (result.COTYPE.toLowerCase() === 'c') {
+                        result.COTYPE = 'پایه';
+                    } else if (result.COTYPE.toLowerCase() === 'd') {
+                        result.COTYPE = 'عمومی';
+                    }
 
-        return courseDetails;
+                    return result;
+                });
+            });
     }
 
     async findOneStudentWithDetails(id: number): Promise<any[]> {
         const courseDetails = await this.COTRepository
             .createQueryBuilder('c')
             .select([
-                'COID',
+                'COID as id',
                 'COTITLE',
                 'COTYPE',
                 'CREDIT',
                 'CFSID',
-                'UniversityName',
+                'CollegeName',
                 'FSName',
-                'TENAME'
+                'CTEID',
+                'TETITLE'
             ])
             .innerJoin(FieldStudy, 'f', 'c.CFSID = f.FSID')
             .innerJoin(Teachers, 't', 'c.CTEID = t.TEID')
-            .innerJoin(College, 'u', 'f.STEID = u.UniversityID')
+            .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
             .where('c.COID = :id', { id })
             .getRawOne();
 

@@ -46,26 +46,40 @@ export class StudentService {
     JOIN
       FieldStudy f ON s.FSID = f.FSID;
   */
-  async findAllStudentsWithDetails(): Promise<any[]> {
+  async findAllStudentsWithDetails(userId?: number): Promise<any[]> {
     const studentDetails = await this.studentRepository
       .createQueryBuilder('s')
       .select([
+        "STID as id",
         "firstName",
         "lastName",
         "STLEV",
         "birthDate",
         "gender",
-        'UniversityName',
+        'CollegeName',
         'FSName',
-        "name as semesterName"
+        "name as semesterName",
+        "us.id as userId"
       ])
-      .innerJoin(FieldStudy, 'f', 's.SFSID = f.FSID')
-      .innerJoin(College, 'u', 'f.STEID = u.UniversityID')
+      .innerJoin(FieldStudy, 'f', 's.FSID = f.FSID')
+      .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
       .innerJoin(Semester, 'se', 's.semesterID = se.semesterId')
       .innerJoin(User, 'us', 's.userId = us.id')
+      .where(userId && `s.userId = ${userId}`)
       .getRawMany();
 
     return studentDetails;
+  }
+
+  async findAllUserTerm(userId?: number): Promise<any> {
+    const terms = await this.studentRepository
+      .query(`
+      SELECT userId, COUNT(userId) AS term
+      FROM stt
+      where userId = ${userId}
+      GROUP BY userId`)
+
+    return terms[0] ?? {};
   }
 
   /*
@@ -89,7 +103,7 @@ export class StudentService {
     const student = await this.studentRepository
       .createQueryBuilder('s')
       .select([
-        "STID",
+        "STID as id",
         "firstName",
         "lastName",
         "STLEV",
@@ -100,7 +114,7 @@ export class StudentService {
         "name as semesterName"
       ])
       .innerJoin(FieldStudy, 'f', 's.SFSID = f.FSID')
-      .innerJoin(College, 'u', 'f.STEID = u.UniversityID')
+      .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
       .innerJoin(Semester, 'se', 's.semesterID = se.semesterId')
       .innerJoin(User, 'us', 's.userId = us.id')
       .where("s.STID = :id", { id })

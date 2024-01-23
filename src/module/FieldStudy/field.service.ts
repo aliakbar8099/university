@@ -37,32 +37,38 @@ export class FieldStudyService {
     STEID u ON u.STEID = f.STEID
 */
 
-  async findAllFieldWithDetails(): Promise<any[]> {
+  async findAllFieldWithDetails(page: number = 1, itemsPerPage: number = 12, searchTerm: string = "", paramValue1: number): Promise<any[]> {
+    
+    const offset = (page - 1) * itemsPerPage;
+
     return this.FSRepository
-      .createQueryBuilder('FieldStudy')
-      .leftJoinAndSelect('FieldStudy.university', 'university')
+      .createQueryBuilder('F')
       .select([
-        'FieldStudy.FSID',
-        'FieldStudy.FSName',
-        'university.UniversityName',
-        'university.UniversityID'
+        "F.FSID as id",
+        "F.FSName as FSName",
+        'College.CollegeName as fk_CollegeID',
       ])
-      .getMany();
+      .innerJoin('F.College', 'College')
+      .where(`F.FSName LIKE N'%${searchTerm}%'`)
+      .where(!!paramValue1 ? `F.fk_CollegeID = ${paramValue1}` : ``)
+      .offset(offset)
+      .limit(itemsPerPage)
+      .getRawMany();
   }
+
 
 
   async findOneFieldWithDetails(id: number): Promise<any[]> {
     return this.FSRepository
-      .createQueryBuilder('FieldStudy')
-      .leftJoinAndSelect('FieldStudy.university', 'university')
-      .where('FieldStudy.FSID = :id', { id })
+      .createQueryBuilder('F')
       .select([
-        'FieldStudy.FSID',
-        'FieldStudy.FSName',
-        'university.UniversityName',
-        'university.UniversityID',
+        "F.FSID as id",
+        "F.FSName as FSName",
+        'College.CollegeName as fk_CollegeID',
       ])
-      .getMany();
+      .innerJoin('F.College', 'College')
+      .where('F.FSID = :id', { id })
+      .getRawOne();
   }
 
   /*

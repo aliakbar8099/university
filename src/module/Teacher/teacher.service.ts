@@ -24,25 +24,26 @@ export class TeachersService {
         return await this.TeachersRepository.save(Teacher);
     }
 
-    async findAll(): Promise<any[]> {
+    async findAll(userId?: number): Promise<any[]> {
         const teacherDetails = await this.TeachersRepository
-        .createQueryBuilder("t")
-        .select([
-            "TEID",
-            "TETITLE",
-            "graduationYear",
-            "TELEV",
-            "firstName",
-            "lastName",
-            "birthDate",
-            "gender",
-            'CollegeName',
-            'FSName',
-        ])
-        .innerJoin(FieldStudy, 'f', 't.fieldStudyId = f.FSID')
-        .innerJoin(College, 'u', 'f.STEID = u.UniversityID')
-        .innerJoin(User, 'us', 't.userId = us.id')
-        .getRawMany()
+            .createQueryBuilder("t")
+            .select([
+                "TEID as id",
+                "TETITLE",
+                "graduationYear",
+                "TELEV",
+                "firstName",
+                "lastName",
+                "birthDate",
+                "gender",
+                'CollegeName',
+                'FSName',
+            ])
+            .innerJoin(FieldStudy, 'f', 't.fieldStudyId = f.FSID')
+            .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
+            .innerJoin(User, 'us', 't.userId = us.id')
+            .where(userId && `t.userId = ${userId}`)
+            .getRawMany()
 
         return teacherDetails;
     }
