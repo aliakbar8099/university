@@ -31,22 +31,7 @@ export class StudentService {
     return await this.studentRepository.save(student);
   }
 
-  /*
-    SELECT
-      s.STID,
-      s.STNAME,
-      s.STLEV,
-      s.STMJR,
-      u.CollegeName,
-      f.FSName
-    FROM
-      STT s
-    JOIN
-      College u ON s.FSID = f.FSID
-    JOIN
-      FieldStudy f ON s.FSID = f.FSID;
-  */
-  async findAllStudentsWithDetails(userId?: number): Promise<any[]> {
+  async findAllStudentsWithDetails(userId?: number, semesterId?: number): Promise<any[]> {
     const studentDetails = await this.studentRepository
       .createQueryBuilder('s')
       .select([
@@ -57,7 +42,9 @@ export class StudentService {
         "birthDate",
         "gender",
         'CollegeName',
+        'f.FSID as FSID',
         'FSName',
+        'se.semesterId as semesterId',
         "name as semesterName",
         "us.id as userId"
       ])
@@ -65,7 +52,7 @@ export class StudentService {
       .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
       .innerJoin(Semester, 'se', 's.semesterID = se.semesterId')
       .innerJoin(User, 'us', 's.userId = us.id')
-      .where(userId && `s.userId = ${userId}`)
+      .where(userId && `s.userId = ${userId}` + (semesterId ? `AND s.semesterId = ${semesterId}` : ''))
       .getRawMany();
 
     return studentDetails;
@@ -80,6 +67,31 @@ export class StudentService {
       GROUP BY userId`)
 
     return terms[0] ?? {};
+  }
+
+  async findUserSemseter(userId?: number, id?: number): Promise<any> {
+    return await this.studentRepository
+      .createQueryBuilder('s')
+      .select([
+        "STID as id",
+        "firstName",
+        "lastName",
+        "STLEV",
+        "birthDate",
+        "gender",
+        'CollegeName',
+        'f.FSID as FSID',
+        'FSName',
+        'se.semesterId as semesterId',
+        "name as semesterName",
+        "us.id as userId"
+      ])
+      .innerJoin(FieldStudy, 'f', 's.FSID = f.FSID')
+      .innerJoin(College, 'u', 'f.fk_CollegeID = u.CollegeID')
+      .innerJoin(Semester, 'se', 's.semesterID = se.semesterId')
+      .innerJoin(User, 'us', 's.userId = us.id')
+      .where(`s.semesterID = ${id} AND s.userId = ${userId}`)
+      .getRawOne();
   }
 
   /*

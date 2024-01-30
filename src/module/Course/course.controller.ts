@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { CotService } from './course.service';
 import { CourseDto } from './dto/course.dto';
 import { COT } from './course.entity';
@@ -20,6 +20,13 @@ export class courseController {
     @Get()
     async findAllStudentsWithDetails(@Query('search') search: string, @Query('page') page: number, @Query('pageSize') pageSize: number, @Query("COTYPE") COTYPE: string, @Query("FieldId") FieldId: string): Promise<any[]> {
         return this.CotController.findAllCourseWithDetails(isNaN(page) ? 1 : page, isNaN(pageSize) ? 12 : pageSize, search ?? "", COTYPE, FieldId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("teacher")
+    async findCourseForTeacher(@Req() request): Promise<any[]> {
+        const userId = request.user.userId;
+        return this.CotController.findCourseForTeacher(userId);
     }
 
     @UseGuards(JwtAuthGuard)

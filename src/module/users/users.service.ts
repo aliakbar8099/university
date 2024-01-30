@@ -99,6 +99,20 @@ export class UsersService {
         return undefined
     }
 
+    async findAllSemesterByUser(userId?: number): Promise<any> {
+        const data = await this.userRepository
+            .query(`
+          SELECT 
+          semester.semesterID as semesterID,
+          name
+          FROM stt , semester
+          WHERE stt.semesterID = semester.semesterId
+          AND userId = ${userId}`)
+
+        return data;
+    }
+
+
     findOne(id: number): Promise<User | undefined> {
         const user = this.userRepository.findOne({ where: { id } })
 

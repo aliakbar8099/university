@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { StudentService } from '@/module/Student/student.service';
 import { StudentDto } from '@/module/Student/dto/student.dto';
 import { STT as Student } from '@/module/Student/student.entity';
@@ -18,8 +18,8 @@ export class StudentController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAllStudentsWithDetails(@Query('userId') userId: number): Promise<any[]> {
-    return this.studentService.findAllStudentsWithDetails(userId);
+  async findAllStudentsWithDetails(@Query('userId') userId: number, semesterId: string): Promise<any[]> {
+    return this.studentService.findAllStudentsWithDetails(userId, +semesterId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -35,8 +35,15 @@ export class StudentController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('semester/:id')
+  async findAllSemester(@Req() request, @Param('id') id: string): Promise<any> {
+    const userId = request.user.userId;
+    return this.studentService.findUserSemseter(+userId, +id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
-  update(@Param('id') id: string, @Body() studentData: Partial<Student>): Promise<Student> {
+  update(@Req() id: string, @Body() studentData: Partial<Student>): Promise<Student> {
     return this.studentService.update(+id, studentData);
   }
 

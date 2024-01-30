@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsInt, Min, Max, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CourseDto {
@@ -26,4 +26,23 @@ export class CourseDto {
   @IsNumber()
   @IsNotEmpty()
   CTEID: number;
+
+  @ApiProperty({ example: 0, description: 'Day of the week (0 to 6)' })
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  @IsNotEmpty()
+  weekDay: number;
+
+  @ApiProperty({ example: '05:30', description: 'Time in HH:mm format' })
+  @IsNotEmpty()
+  hour: string;
+
+  @IsDateString()
+  @IsNotEmpty()
+  examDate: Date;
+
+  @ApiProperty({ example: '05:30', description: 'Time in HH:mm format' })
+  @IsNotEmpty()
+  examHour: string;
 }

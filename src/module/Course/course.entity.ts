@@ -19,12 +19,25 @@ export class COT {
   @Column()
   CFSID: number;
 
-  @ManyToOne(() => FieldStudy)
-  @JoinColumn({ name: 'CFSID' })
-  fieldStudy: FieldStudy;
 
   @Column()
   CTEID: number;
+
+  @Column()
+  weekDay: number;
+
+  @Column()
+  hour: string;
+
+  @Column()
+  examDate: Date;
+
+  @Column()
+  examHour: string;
+
+  @ManyToOne(() => FieldStudy)
+  @JoinColumn({ name: 'CFSID' })
+  fieldStudy: FieldStudy;
 
   @ManyToOne(() => Teachers)
   @JoinColumn({ name: 'CTEID' })

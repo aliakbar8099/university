@@ -30,20 +30,17 @@ export class CourseRegistration {
     @JoinColumn({ name: 'semesterID' })
     semester: Semester;
 
-    @Column('decimal', { precision: 4, scale: 2, default: 0 })
+    @Column('decimal', { precision: 4, scale: 2, default: null })
     grade: number;
 
-    @Column()
-    startDate: Date;
-
-    @Column()
-    examDate: Date;
+    @Column({ default: false })
+    isFinal: boolean;
 
     @CreateDateColumn()
     createdAt: Date;
 
     @BeforeInsert()
     setDefaultGrade() {
-        this.grade = 0;
+        this.grade = null;
     }
 }

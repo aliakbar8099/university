@@ -12,12 +12,4 @@ export class CourseRegistrationDto {
   @IsNumber()
   @IsNotEmpty()
   semesterID: number;
-  
-  @IsDateString()
-  @IsNotEmpty()
-  startDate: Date;
-  
-  @IsDateString()
-  @IsNotEmpty()
-  examDate: Date;
 }

@@ -28,19 +28,45 @@ export class CotService {
 
     async findAllCourseWithDetails(page: number = 1, itemsPerPage: number = 12, searchTerm: string = "", COTYPE: string, FieldID: string): Promise<any[]> {
         const offset = (page - 1) * itemsPerPage;
-        
+
         return await this.COTRepository
             .createQueryBuilder('c')
             .select([
                 'COID as id',
-                'COTITLE',
+                `CONCAT(COTITLE,' - ', 
+                CASE c.COTYPE
+                    WHEN 'A' THEN N'تخصصی'
+                    WHEN 'B' THEN N'اصلی'
+                    WHEN 'C' THEN N'پایه'
+                    WHEN 'D' THEN N'عمومی'
+                ELSE ''
+                END,' - ',CREDIT,N' واحد') as COTITLE`,
                 'COTYPE',
                 'CREDIT',
                 'CFSID',
                 'CollegeName',
                 'FSName',
                 'CTEID',
-                'TETITLE'
+                'TETITLE',
+                `
+                    CONCAT(
+                        CASE c.weekDay
+                            WHEN 6 THEN N'شنبه'
+                            WHEN 0 THEN N'یک‌شنبه'
+                            WHEN 1 THEN N'دوشنبه'
+                            WHEN 2 THEN N'سه‌شنبه'
+                            WHEN 3 THEN N'چهارشنبه'
+                            WHEN 4 THEN N'پنج‌شنبه'
+                            WHEN 5 THEN N'جمعه'
+                            ELSE ''
+                        END,
+                        ' - ',
+                        c.hour
+                    ) AS course_time
+                `,
+                'examDate',
+                "examHour",
+                // "CONCAT(examDate,' - ',examHour) as exam_time"
             ])
             .innerJoin(FieldStudy, 'f', 'c.CFSID = f.FSID')
             .innerJoin(Teachers, 't', 'c.CTEID = t.TEID')
@@ -52,19 +78,24 @@ export class CotService {
             .getRawMany()
             .then(results => {
                 return results.map(result => {
-                    if (result.COTYPE.toLowerCase() === 'a') {
-                        result.COTYPE = 'تخصصی';
-                    } else if (result.COTYPE.toLowerCase() === 'b') {
-                        result.COTYPE = 'اصلی';
-                    } else if (result.COTYPE.toLowerCase() === 'c') {
-                        result.COTYPE = 'پایه';
-                    } else if (result.COTYPE.toLowerCase() === 'd') {
-                        result.COTYPE = 'عمومی';
-                    }
-
+                    result["exam_time"] = `${new Date(result.examDate).toLocaleDateString('fa-IR')} - ${result.examHour}`
                     return result;
                 });
             });
+    }
+
+    async findCourseForTeacher(id:number){
+        const data = await this.COTRepository.query(`
+        SELECT 
+            COID,
+            COTITLE
+        FROM cot c
+        JOIN teachers t ON t.TEID = c.CTEID
+        JOIN [dbo].[user] u ON u.id = t.userId
+        WHERE userId = ${id}
+        `)
+        
+        return data
     }
 
     async findOneStudentWithDetails(id: number): Promise<any[]> {

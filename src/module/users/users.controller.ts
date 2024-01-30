@@ -31,4 +31,13 @@ export class UsersController {
     const userId = request.user.userId;
     return this.userService.findOne(userId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/semester')
+  findAllSemesterByUser(@Req() request) {
+    const userId = request.user.userId;
+    return this.userService.findAllSemesterByUser(userId);
+  }
+
+
 }
